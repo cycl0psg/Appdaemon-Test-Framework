@@ -1,3 +1,4 @@
+import re
 import textwrap
 from abc import ABC, abstractmethod
 
@@ -120,6 +121,8 @@ class WasWrapper(Was):
     def called_with(self, **kwargs):
         """ Assert that a given service has been called with the given arguments"""
         service_full_name = self.thing_to_check
+        if not _is_valid_service_name(service_full_name):
+            raise ValueError("Service names should be given as: domain/service in AppDaemon.")
 
         self.hass_functions['call_service'].assert_any_call(
             service_full_name, **kwargs)
@@ -140,6 +143,10 @@ class WasWrapper(Was):
 
         if service_not_called and set_option_helper_not_called:
             raise EitherOrAssertionError(service_not_called, set_option_helper_not_called)
+
+
+def _is_valid_service_name(service_full_name: str):
+    return re.match(r"[\w]+/[\w]+", service_full_name) is not None
 
 
 class WasNotWrapper(Was):

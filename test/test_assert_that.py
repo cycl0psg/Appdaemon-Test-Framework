@@ -74,6 +74,9 @@ class MockAutomation(hass.Hass):
                 transition=TRANSITION_DURATION
             )
 
+    def call_invalid_service_name(self):
+        self.call_service("switch.turn_off", entity_id=SWITCH)
+
 
 @automation_fixture(MockAutomation)
 def automation():
@@ -156,3 +159,24 @@ class TestSelectOption:
             assert_that(INPUT_SELECT).was_not.set_to_option('new_service_option')
             automation.call_service("input_select/select_option", entity_id=INPUT_SELECT, option='new_service_option')
             assert_that(INPUT_SELECT).was.set_to_option('new_service_option')
+
+
+class TestServiceNameValidation:
+    class TestValidServiceName:
+        def test_valid_service_asserted_and_is_called_does_not_raise(self, assert_that, automation):
+            automation.turn_off_switch(via_helper=False)
+            assert_that("switch/turn_off").was.called_with(entity_id=SWITCH)
+
+        def test_valid_service_asserted_and_is_not_called_raises_assertion_error(self, assert_that, automation):
+            with pytest.raises(AssertionError):
+                assert_that("switch/turn_off").was.called_with(entity_id=SWITCH)
+
+    class TestInvalidServiceName:
+        def test_invalid_service_asserted_and_is_called_raises_value_error(self, assert_that, automation):
+            automation.call_invalid_service_name()
+            with pytest.raises(ValueError):
+                assert_that("switch.turn_off").was.called_with(entity_id=SWITCH)
+
+        def test_invalid_service_asserted_and_is_not_called_raises_value_or_assertion_error(self, assert_that, automation):
+            with pytest.raises((ValueError, AssertionError)):
+                assert_that("switch.turn_off").was.called_with(entity_id=SWITCH)
