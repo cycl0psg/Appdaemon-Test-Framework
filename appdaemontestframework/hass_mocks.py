@@ -1,4 +1,5 @@
 import logging
+import uuid
 import warnings
 
 from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
@@ -81,19 +82,15 @@ class HassMocks:
             ### Scheduler callback registrations functions
             # Wrap all these so we can re-use the AppDaemon code, but check
             # if they were called
-            SpyMockHandler(Hass, 'run_in'),
-            MockHandler(Hass, 'run_once'),
-            MockHandler(Hass, 'run_at'),
-            MockHandler(Hass, 'run_daily'),
-            MockHandler(Hass, 'run_hourly'),
-            MockHandler(Hass, 'run_minutely'),
-            MockHandler(Hass, 'run_every'),
-            SpyMockHandler(Hass, 'cancel_timer'),
-
+            MockHandler(Hass, "run_once", side_effect=self._uuid4),
+            MockHandler(Hass, "run_at", side_effect=self._uuid4),
+            MockHandler(Hass, "run_daily", side_effect=self._uuid4),
+            MockHandler(Hass, "run_hourly", side_effect=self._uuid4),
+            MockHandler(Hass, "run_minutely", side_effect=self._uuid4),
+            MockHandler(Hass, "run_every", side_effect=self._uuid4),
             ### Sunrise and sunset functions
-            MockHandler(Hass, 'run_at_sunrise'),
-            MockHandler(Hass, 'run_at_sunset'),
-
+            MockHandler(Hass, "run_at_sunrise", side_effect=self._uuid4),
+            MockHandler(Hass, "run_at_sunset", side_effect=self._uuid4),
             ### Listener callback registrations functions
             MockHandler(Hass, 'listen_event'),
             MockHandler(Hass, 'listen_state'),
@@ -148,6 +145,10 @@ class HassMocks:
         # Renamed the function to remove confusion
         get_logging_level_from_name = logging.getLevelName
         logging.log(get_logging_level_from_name(level), msg)
+
+    def _uuid4(*args, **kwargs):
+        # return uuid4 for handle identification
+        return uuid.uuid4()
 
 
 class MockHandler:
