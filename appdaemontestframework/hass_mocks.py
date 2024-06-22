@@ -93,9 +93,10 @@ class HassMocks:
             MockHandler(Hass, "run_at_sunrise", side_effect=self._uuid4),
             MockHandler(Hass, "run_at_sunset", side_effect=self._uuid4),
             ### Listener callback registrations functions
-            MockHandler(Hass, 'listen_event'),
-            MockHandler(Hass, 'listen_state'),
-
+            MockHandler(Hass, "listen_event"),
+            MockHandler(Hass, "cancel_listen_event"),
+            MockHandler(Hass, "listen_state"),
+            MockHandler(Hass, "cancel_listen_state"),
             ### State functions / attr
             MockHandler(Hass, 'set_state'),
             MockHandler(Hass, 'get_state'),
