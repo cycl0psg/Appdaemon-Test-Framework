@@ -40,7 +40,7 @@ class MockScheduler:
                 return True
         return False
 
-    async def cancel_timer(self, name, handle):
+    async def cancel_timer(self, name, handle, silent=False):
         for callback in self._registered_callbacks:
             if callback.handle == handle:
                 self._registered_callbacks.remove(callback)
