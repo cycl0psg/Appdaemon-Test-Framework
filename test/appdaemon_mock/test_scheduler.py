@@ -1,10 +1,12 @@
-from appdaemontestframework.appdaemon_mock.scheduler import MockScheduler
-from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
 import asyncio
-import pytest
-import mock
 import datetime
+
+import mock
+import pytest
 import pytz
+
+from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
+from appdaemontestframework.appdaemon_mock.scheduler import MockScheduler
 
 
 @pytest.fixture
@@ -108,7 +110,6 @@ class Test_scheduling_and_dispatch:
             scheduler.insert_schedule('', now + datetime.timedelta(seconds=30), third_mock, False, None),
             scheduler.insert_schedule('', now + datetime.timedelta(seconds=20), second_mock, False, None))
 
-
         scheduler.sim_fast_forward(datetime.timedelta(seconds=30))
 
         expected_call_order = [mock.call.first_mock({}), mock.call.second_mock({}), mock.call.third_mock({})]
@@ -142,6 +143,32 @@ class Test_scheduling_and_dispatch:
         scheduler.sim_fast_forward(datetime.timedelta(seconds=10))
 
         callback_mock.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_timer_running_true_before_timeout(self, scheduler: MockScheduler):
+        callback_mock = mock.Mock()
+        now = await scheduler.get_now()
+        handle = await scheduler.insert_schedule("", now + datetime.timedelta(seconds=10), callback_mock, False, None)
+        assert await scheduler.timer_running("", handle)
+        scheduler.sim_fast_forward(datetime.timedelta(seconds=5))
+        assert await scheduler.timer_running("", handle)
+
+    @pytest.mark.asyncio
+    async def test_timer_running_false_after_timeout(self, scheduler: MockScheduler):
+        callback_mock = mock.Mock()
+        now = await scheduler.get_now()
+        handle = await scheduler.insert_schedule("", now + datetime.timedelta(seconds=10), callback_mock, False, None)
+        scheduler.sim_fast_forward(datetime.timedelta(seconds=10))
+        assert not await scheduler.timer_running("", handle)
+
+    @pytest.mark.asyncio
+    async def test_timer_running_false_after_cancel(self, scheduler: MockScheduler):
+        callback_mock = mock.Mock()
+        now = await scheduler.get_now()
+        handle = await scheduler.insert_schedule("", now + datetime.timedelta(seconds=10), callback_mock, False, None)
+        scheduler.sim_fast_forward(datetime.timedelta(seconds=5))
+        await scheduler.cancel_timer("", handle)
+        assert not await scheduler.timer_running("", handle)
 
     @pytest.mark.asyncio
     async def test_time_is_correct_when_callback_it_run(self, scheduler: MockScheduler):

@@ -34,6 +34,12 @@ class MockScheduler:
         naive_dt = self.make_naive(aware_dt)
         return self._queue_calllback(callback, kwargs, naive_dt)
 
+    async def timer_running(self, name, handle):
+        for callback in self._registered_callbacks:
+            if callback.handle == handle:
+                return True
+        return False
+
     async def cancel_timer(self, name, handle):
         for callback in self._registered_callbacks:
             if callback.handle == handle:

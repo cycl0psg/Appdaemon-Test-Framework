@@ -88,6 +88,7 @@ class HassMocks:
             MockHandler(Hass, "run_hourly", side_effect=self._uuid4),
             MockHandler(Hass, "run_minutely", side_effect=self._uuid4),
             MockHandler(Hass, "run_every", side_effect=self._uuid4),
+            SpyMockHandler(Hass, "timer_running"),
             ### Sunrise and sunset functions
             MockHandler(Hass, "run_at_sunrise", side_effect=self._uuid4),
             MockHandler(Hass, "run_at_sunset", side_effect=self._uuid4),
