@@ -82,16 +82,16 @@ class HassMocks:
             ### Scheduler callback registrations functions
             # Wrap all these so we can re-use the AppDaemon code, but check
             # if they were called
-            MockHandler(Hass, "run_once", side_effect=self._uuid4),
-            MockHandler(Hass, "run_at", side_effect=self._uuid4),
-            MockHandler(Hass, "run_daily", side_effect=self._uuid4),
-            MockHandler(Hass, "run_hourly", side_effect=self._uuid4),
-            MockHandler(Hass, "run_minutely", side_effect=self._uuid4),
-            MockHandler(Hass, "run_every", side_effect=self._uuid4),
+            SpyMockHandler(Hass, "run_once"),
+            SpyMockHandler(Hass, "run_at"),
+            SpyMockHandler(Hass, "run_daily"),
+            SpyMockHandler(Hass, "run_hourly"),
+            SpyMockHandler(Hass, "run_minutely"),
+            SpyMockHandler(Hass, "run_every"),
             SpyMockHandler(Hass, "timer_running"),
             ### Sunrise and sunset functions
-            MockHandler(Hass, "run_at_sunrise", side_effect=self._uuid4),
-            MockHandler(Hass, "run_at_sunset", side_effect=self._uuid4),
+            SpyMockHandler(Hass, "run_at_sunrise"),
+            SpyMockHandler(Hass, "run_at_sunset"),
             ### Listener callback registrations functions
             MockHandler(Hass, "listen_event"),
             MockHandler(Hass, "cancel_listen_event"),

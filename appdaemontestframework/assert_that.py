@@ -236,10 +236,7 @@ class RegisteredWrapper:
         class WithCallbackWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
-                registered_wrapper._run_daily.assert_any_call(
-                    callback,
-                    time_,
-                    **kwargs)
+                registered_wrapper._run_daily.assert_any_call(callback.__self__, callback, time_, **kwargs)
 
         return WithCallbackWrapper()
 
@@ -249,10 +246,7 @@ class RegisteredWrapper:
         class WithCallbackWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
-                registered_wrapper._run_mintely.assert_any_call(
-                    callback,
-                    time_,
-                    **kwargs)
+                registered_wrapper._run_mintely.assert_any_call(callback.__self__, callback, time_, **kwargs)
 
         return WithCallbackWrapper()
 
@@ -262,10 +256,17 @@ class RegisteredWrapper:
         class WithCallbackWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
-                registered_wrapper._run_at.assert_any_call(
-                    callback,
-                    time_,
-                    **kwargs)
+                registered_wrapper._run_at.assert_any_call(callback.__self__, callback, time_, **kwargs)
+
+        return WithCallbackWrapper()
+
+    def run_every(self, time_, interval, **kwargs):
+        registered_wrapper = self
+
+        class WithCallbackWrapper:
+            def with_callback(self, callback):
+                registered_wrapper.automation_thing_to_check.initialize()
+                registered_wrapper._run_every.assert_any_call(callback.__self__, callback, time_, **kwargs)
 
         return WithCallbackWrapper()
 
