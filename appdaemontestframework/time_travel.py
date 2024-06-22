@@ -1,5 +1,7 @@
-from appdaemontestframework.hass_mocks import HassMocks
 import datetime
+
+from appdaemontestframework.hass_mocks import HassMocks
+
 
 class TimeTravelWrapper:
     """
@@ -20,6 +22,8 @@ class TimeTravelWrapper:
         You can chain the calls and call `fast_forward` multiple times in a single test
 
         Format:
+        > time_travel.assert_current_time(1).hours()
+        > # Or
         > time_travel.fast_forward(10).minutes()
         > # Or
         > time_travel.fast_forward(30).seconds()
@@ -33,12 +37,13 @@ class TimeTravelWrapper:
         Expected current time is expressed as a duration from T = 0
 
         Format:
+        > time_travel.assert_current_time(1).hours()
+        > # Or
         > time_travel.assert_current_time(10).minutes()
         > # Or
         > time_travel.assert_current_time(30).seconds()
         """
         return UnitsWrapper(expected_current_time, self._assert_current_time_seconds)
-
 
     def _fast_forward_seconds(self, seconds_to_fast_forward):
         self._hass_mocks.AD.sched.sim_fast_forward(datetime.timedelta(seconds=seconds_to_fast_forward))
@@ -53,6 +58,9 @@ class UnitsWrapper:
     def __init__(self, duration, function_with_arg_in_seconds):
         self.duration = duration
         self.function_with_arg_in_seconds = function_with_arg_in_seconds
+
+    def hours(self):
+        self.function_with_arg_in_seconds(self.duration * 60 * 60)
 
     def minutes(self):
         self.function_with_arg_in_seconds(self.duration * 60)
