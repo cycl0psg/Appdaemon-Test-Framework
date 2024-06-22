@@ -102,11 +102,7 @@ class HassMocks:
             DictMockHandler(Hass, 'args'),
 
             ### Interactions functions
-            MockHandler(Hass, 'call_service'),
-            MockHandler(Hass, 'turn_on'),
-            MockHandler(Hass, 'turn_off'),
-            MockHandler(Hass, 'fire_event'),
-
+            MockHandler(Hass, "select_option"),
             ### Custom callback functions
             MockHandler(Hass, 'register_constraint'),
             MockHandler(Hass, 'now_is_between'),
