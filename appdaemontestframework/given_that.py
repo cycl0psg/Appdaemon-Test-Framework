@@ -58,11 +58,12 @@ class GivenThatWrapper:
 
                 state = self.mocked_states[namespace][entity_id]
 
-                if attribute is None:
+                if attribute is None or attribute == "state":
                     return state['main']
                 elif attribute == 'all':
                     def format_time(timestamp: datetime):
-                        if not timestamp: return None
+                        if not timestamp:
+                            return None
                         return timestamp.isoformat()
 
                     return {
