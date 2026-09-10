@@ -1,6 +1,5 @@
 import warnings
 from inspect import isfunction, signature
-import pkg_resources
 
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
@@ -15,15 +14,10 @@ class AutomationFixtureError(AppdaemonTestFrameworkError):
 def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks):
     _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks)
 
-    automation = automation_class(
-            None,
-            automation_class.__name__,
-            None,
-            None,
-            None,
-            None,
-            None
-    )
+    # `Hass.__init__` is fully mocked (see `HassMocks._hass_init_mock`), which takes
+    # `(self, ad, name, *args)`. AppDaemon >=4.5 constructs apps as `Hass(ad, config_model)`;
+    # we pass the class name in the `name` slot so the mock can build a minimal config.
+    automation = automation_class(None, automation_class.__name__)
     automation.initialize()
     given_that.mock_functions_are_cleared()
     return automation
@@ -48,7 +42,6 @@ def _inject_helpers_and_call_function(function, given_that, hass_functions, hass
                 Replace `hass_functions` with `hass_mocks` injections and access hass_functions with `hass_mocks.hass_functions`
                 """,
                 DeprecationWarning)
-
 
     args = []
     for param in signature(function).parameters:

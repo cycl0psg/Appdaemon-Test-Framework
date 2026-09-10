@@ -11,7 +11,12 @@ from appdaemontestframework.appdaemon_mock.scheduler import MockScheduler
 
 @pytest.fixture
 def scheduler() -> MockScheduler:
-    return MockScheduler(MockAppDaemon())
+    ad = MockAppDaemon()
+    try:
+        yield ad.sched
+    finally:
+        ad.sched.sim_stop()
+        ad.stop()
 
 
 def test_calling_a_scheduler_method_not_mocked_raises_a_helpful_error_message(

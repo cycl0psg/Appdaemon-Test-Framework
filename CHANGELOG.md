@@ -7,13 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [Unreleased]
 ## Features
-*
+* Compatibility with AppDaemon 4.5.x (tested against 4.5.13)
+* New mocked helpers: `call_service`, `turn_on`, `turn_off`, `fire_event`,
+  `entity_exists`, `get_app`, `friendly_name`, `set_log_level`, `app_config`,
+  `anyone_home` / `everyone_home` / `noone_home`
+* `given_that.app_config(key).is_set_to(value)` and `get_app` / `friendly_name` mocking
+* Time simulation now also freezes the wall clock (`time_machine`) so code that reads
+  the real clock directly (`datetime.now()`) observes the simulated time
 
 ## Fixes
-* 
+* Adapt to AppDaemon 4.5 internals: `sync_wrapper` → `sync_decorator`, the pydantic
+  `AppConfig`-based `Hass.__init__`, and the new `Scheduler.insert_schedule` signature.
+  `MockAppDaemon` now drives ADAPI coroutines on a real background event loop.
+* Drop the removed `pkg_resources` dependency
 
 ## Breaking Changes
-* None
+* Requires AppDaemon >= 4.5 and Python >= 3.10
+* The `run_daily` / `run_at` / `run_minutely` / `run_hourly` / `run_every` /
+  `run_at_sunrise` / `run_at_sunset` mocks are no longer autospec'd: recorded calls no
+  longer include the bound `self` as the first argument
+  (`assert_that(app).registered.*` is updated to match)
 
 
 # [4.0.0b1&2]

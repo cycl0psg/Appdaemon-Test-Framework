@@ -1,8 +1,10 @@
-from appdaemon.plugins.hass.hassapi import Hass
-from appdaemontestframework import automation_fixture
-import mock
-import pytest
 import datetime
+from unittest import mock
+
+import pytest
+from appdaemon.plugins.hass.hassapi import Hass
+
+from appdaemontestframework import automation_fixture
 
 
 class MockAutomation(Hass):
@@ -51,7 +53,12 @@ class Test_fast_forward:
 
     def test_minutes(self, time_travel, automation_at_noon):
         time_travel.fast_forward(90).minutes()
-        assert automation_at_noon.datetime() == datetime.datetime(2020, 1, 1, 13, 30)
+        new_var = automation_at_noon.datetime()
+        assert new_var == datetime.datetime(2020, 1, 1, 13, 30)
+
+    def test_hours(self, time_travel, automation_at_noon):
+        time_travel.fast_forward(3).hours()
+        assert automation_at_noon.datetime() == datetime.datetime(2020, 1, 1, 15, 0)
 
 
 class Test_callback_execution:

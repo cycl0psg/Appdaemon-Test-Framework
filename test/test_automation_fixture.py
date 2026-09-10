@@ -3,7 +3,7 @@ from textwrap import dedent
 
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
-from pytest import mark, fixture
+from pytest import fixture, mark
 
 
 class MockAutomation(Hass):
@@ -168,8 +168,8 @@ class TestAutomationFixture:
         assert expected_error_regex_was_found_in_stdout_lines(result, r"AutomationFixtureError.*argument")
 
     def test_name_attribute_of_hass_object_set_to_automation_class_name(self, testdir):
-            testdir.makepyfile(
-                """
+        testdir.makepyfile(
+            """
                 from appdaemon.plugins.hass.hassapi import Hass
                 from appdaemontestframework import automation_fixture
 
@@ -183,10 +183,11 @@ class TestAutomationFixture:
 
                 def test_name_attribute_of_hass_object_set_to_automation_class_name(mock_automation):
                     assert mock_automation.name == 'MockAutomation'
-            """)
+            """
+        )
 
-            result = testdir.runpytest()
-            result.assert_outcomes(passed=1)
+        result = testdir.runpytest()
+        result.assert_outcomes(passed=1)
 
     class TestInvalidAutomation:
         @fixture

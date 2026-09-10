@@ -2,8 +2,7 @@ import re
 import textwrap
 from abc import ABC, abstractmethod
 
-
-### Custom Matchers ##################################################
+# Custom Matchers ##################################################
 
 
 class ServiceOnAnyDomain:
@@ -36,7 +35,7 @@ assert 'asdfasdf' == AnyString()
 ######################################################################
 
 
-### Custom Exception #################################################
+# Custom Exception #################################################
 class EitherOrAssertionError(AssertionError):
     def __init__(self, first_assertion_error, second_assertion_error):
         message = '\n'.join([
@@ -228,7 +227,7 @@ class RegisteredWrapper:
         self._run_daily = hass_functions['run_daily']
         self._run_mintely = hass_functions['run_minutely']
         self._run_at = hass_functions['run_at']
-
+        self._run_every = hass_functions["run_every"]
 
     def run_daily(self, time_, **kwargs):
         registered_wrapper = self
@@ -236,7 +235,7 @@ class RegisteredWrapper:
         class WithCallbackWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
-                registered_wrapper._run_daily.assert_any_call(callback.__self__, callback, time_, **kwargs)
+                registered_wrapper._run_daily.assert_any_call(callback, time_, **kwargs)
 
         return WithCallbackWrapper()
 
@@ -246,7 +245,7 @@ class RegisteredWrapper:
         class WithCallbackWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
-                registered_wrapper._run_mintely.assert_any_call(callback.__self__, callback, time_, **kwargs)
+                registered_wrapper._run_mintely.assert_any_call(callback, time_, **kwargs)
 
         return WithCallbackWrapper()
 
@@ -256,7 +255,7 @@ class RegisteredWrapper:
         class WithCallbackWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
-                registered_wrapper._run_at.assert_any_call(callback.__self__, callback, time_, **kwargs)
+                registered_wrapper._run_at.assert_any_call(callback, time_, **kwargs)
 
         return WithCallbackWrapper()
 
@@ -266,7 +265,7 @@ class RegisteredWrapper:
         class WithCallbackWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
-                registered_wrapper._run_every.assert_any_call(callback.__self__, callback, time_, **kwargs)
+                registered_wrapper._run_every.assert_any_call(callback, time_, **kwargs)
 
         return WithCallbackWrapper()
 

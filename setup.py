@@ -20,11 +20,18 @@ setup(
     author_email='Flori@nKempenich.com',
     packages=find_packages(),
     license='MIT',
-    python_requires=">=3.7",
+    python_requires=">=3.10",
     install_requires=[
-        'appdaemon>=4.0,<5.0',
-        'mock>=3.0.5,<4.0',
-        'packaging>=20.1,<21.0',
+        'appdaemon>=4.5,<5.0',
+        'mock>=3.0.5',
+        'packaging>=20.1',
+        'time-machine>=2.0',
     ],
+    extras_require={
+        'test': [
+            'pytest>=8',
+            'pytest-asyncio>=0.24',
+        ],
+    },
     include_package_data=True
 )

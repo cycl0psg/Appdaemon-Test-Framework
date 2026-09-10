@@ -8,11 +8,11 @@ appdaemontestframework = {editable=true, path="."}
 
 [dev-packages]
 coverage = "*"
-pytest = ">=5.3.0,<5.4.0"
-pytest-asyncio = "*"
+pytest = ">=8"
+pytest-asyncio = ">=0.24"
 pylint = "*"
 "autopep8" = "*"
 tox = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.12"

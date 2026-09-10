@@ -1,11 +1,7 @@
-from datetime import time, datetime
-
 import appdaemon.plugins.hass.hassapi as hass
 import pytest
-from pytest import mark
 
 from appdaemontestframework import automation_fixture
-
 
 """
 Note:
@@ -85,7 +81,8 @@ def automation():
 
 class TestTurnedOn:
     class TestViaService:
-        def test_was_turned_on(self, assert_that, automation):
+
+        def test_was_turned_on(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_on()
             automation.turn_on_light()
             assert_that(LIGHT).was.turned_on()
@@ -94,13 +91,14 @@ class TestTurnedOn:
             automation.turn_on_switch()
             assert_that(SWITCH).was.turned_on()
 
-        def test_with_kwargs(self, assert_that, automation):
+        def test_with_kwargs(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_on()
             automation.turn_on_light_with_transition()
             assert_that(LIGHT).was.turned_on(transition=TRANSITION_DURATION)
 
     class TestViaHelper:
-        def test_was_turned_on(self, assert_that, automation):
+
+        def test_was_turned_on(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_on()
             automation.turn_on_light(via_helper=True)
             assert_that(LIGHT).was.turned_on()
@@ -109,7 +107,7 @@ class TestTurnedOn:
             automation.turn_on_switch(via_helper=True)
             assert_that(SWITCH).was.turned_on()
 
-        def test_with_kwargs(self, assert_that, automation):
+        def test_with_kwargs(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_on()
             automation.turn_on_light_with_transition(via_helper=True)
             assert_that(LIGHT).was.turned_on(transition=TRANSITION_DURATION)
@@ -117,7 +115,8 @@ class TestTurnedOn:
 
 class TestTurnedOff:
     class TestViaService:
-        def test_was_turned_off(self, assert_that, automation):
+
+        def test_was_turned_off(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_off()
             automation.turn_off_light()
             assert_that(LIGHT).was.turned_off()
@@ -126,13 +125,14 @@ class TestTurnedOff:
             automation.turn_off_switch()
             assert_that(SWITCH).was.turned_off()
 
-        def test_with_kwargs(self, assert_that, automation):
+        def test_with_kwargs(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_off()
             automation.turn_off_light_with_transition()
             assert_that(LIGHT).was.turned_off(transition=TRANSITION_DURATION)
 
     class TestViaHelper:
-        def test_was_turned_off(self, assert_that, automation):
+
+        def test_was_turned_off(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_off()
             automation.turn_off_light(via_helper=True)
             assert_that(LIGHT).was.turned_off()
@@ -141,7 +141,7 @@ class TestTurnedOff:
             automation.turn_off_switch(via_helper=True)
             assert_that(SWITCH).was.turned_off()
 
-        def test_with_kwargs(self, assert_that, automation):
+        def test_with_kwargs(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(LIGHT).was_not.turned_off()
             automation.turn_off_light_with_transition(via_helper=True)
             assert_that(LIGHT).was.turned_off(transition=TRANSITION_DURATION)
@@ -149,13 +149,15 @@ class TestTurnedOff:
 
 class TestSelectOption:
     class TestViaHelper:
-        def test_option_is_set(self, assert_that, automation):
+
+        def test_option_is_set(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(INPUT_SELECT).was_not.set_to_option('new_option')
             automation.select_option(INPUT_SELECT, 'new_option')
             assert_that(INPUT_SELECT).was.set_to_option('new_option')
 
     class TestViaService:
-        def test_option_is_set(self, assert_that, automation):
+
+        def test_option_is_set(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             assert_that(INPUT_SELECT).was_not.set_to_option('new_service_option')
             automation.call_service("input_select/select_option", entity_id=INPUT_SELECT, option='new_service_option')
             assert_that(INPUT_SELECT).was.set_to_option('new_service_option')
@@ -163,20 +165,23 @@ class TestSelectOption:
 
 class TestServiceNameValidation:
     class TestValidServiceName:
-        def test_valid_service_asserted_and_is_called_does_not_raise(self, assert_that, automation):
+
+        def test_valid_service_asserted_and_is_called_does_not_raise(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             automation.turn_off_switch(via_helper=False)
             assert_that("switch/turn_off").was.called_with(entity_id=SWITCH)
 
-        def test_valid_service_asserted_and_is_not_called_raises_assertion_error(self, assert_that, automation):
+        def test_valid_service_asserted_and_is_not_called_raises_assertion_error(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             with pytest.raises(AssertionError):
                 assert_that("switch/turn_off").was.called_with(entity_id=SWITCH)
 
     class TestInvalidServiceName:
-        def test_invalid_service_asserted_and_is_called_raises_value_error(self, assert_that, automation):
+
+        def test_invalid_service_asserted_and_is_called_raises_value_error(self, assert_that, automation) -> None:  # pylint: disable=redefined-outer-name
             automation.call_invalid_service_name()
             with pytest.raises(ValueError):
                 assert_that("switch.turn_off").was.called_with(entity_id=SWITCH)
 
-        def test_invalid_service_asserted_and_is_not_called_raises_value_or_assertion_error(self, assert_that, automation):
+        # pylint: disable=redefined-outer-name
+        def test_invalid_service_asserted_and_is_not_called_raises_value_or_assertion_error(self, assert_that, automation) -> None:
             with pytest.raises((ValueError, AssertionError)):
                 assert_that("switch.turn_off").was.called_with(entity_id=SWITCH)
