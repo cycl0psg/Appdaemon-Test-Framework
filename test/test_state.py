@@ -58,6 +58,23 @@ def test_set_and_get_state(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT, namespace="test").is_set_to("on")
     assert automation.is_light_turned_on(namespace="test")
 
+def test_get_state_hands_out_copies(given_that, automation: MockAutomation):
+    given_that.state_of(LIGHT).is_set_to('on', attributes={'effect_list': ['a', 'b']})
+
+    automation.get_state(LIGHT, attribute='effect_list').remove('a')
+    automation.get_all_attributes_from_light()['attributes'].pop('effect_list')
+
+    assert automation.get_state(LIGHT, attribute='effect_list') == ['a', 'b']
+
+
+def test_get_state_without_copy_hands_out_the_state_itself(given_that, automation: MockAutomation):
+    given_that.state_of(LIGHT).is_set_to('on', attributes={'effect_list': ['a', 'b']})
+
+    automation.get_state(LIGHT, attribute='effect_list', copy=False).remove('a')
+
+    assert automation.get_state(LIGHT, attribute='effect_list') == ['b']
+
+
 def test_attribute_was_never_set__raise_error(given_that,
                                               automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on')

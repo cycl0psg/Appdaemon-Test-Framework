@@ -1,5 +1,6 @@
 import re
 from collections import defaultdict
+from copy import deepcopy
 from datetime import datetime
 
 from appdaemontestframework.common import AppdaemonTestFrameworkError
@@ -134,7 +135,13 @@ class GivenThatWrapper:
                     value = self.entity_meta.get(entity_id, {}).get(attribute)
                 return value
 
-        self._hass_mocks.hass_functions['get_state'].side_effect = get_state_mock
+        def get_state_copy_mock(*args, copy=True, **kwargs):
+            # AppDaemon hands out deep copies unless `copy=False`: an app mutating what it got
+            # back must not change the state the next `get_state` call sees
+            state = get_state_mock(*args, **kwargs)
+            return deepcopy(state) if copy else state
+
+        self._hass_mocks.hass_functions['get_state'].side_effect = get_state_copy_mock
 
         def entity_exists_mock(entity_id, namespace=None):
             namespace = namespace or "default"
