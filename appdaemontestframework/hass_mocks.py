@@ -18,6 +18,65 @@ def is_appdaemon_version_at_least(version_as_string):
     return CURRENT_APPDAEMON_VERSION >= expected_appdaemon_version
 
 
+class PerAppArgs(dict):
+    """The args of a single app, over the args `given_that` is currently mocking
+
+    `Hass.args` is patched onto the *class*, so every app instance would otherwise read and
+    write one shared dict and the last app configured would speak for all of them. Each app
+    gets one of these instead: it owns a copy of the args it was configured with, and anything
+    it was not configured with still falls through to the shared dict, so setting a
+    `given_that.passed_arg` after an app is built keeps working.
+    """
+
+    def __init__(self, own, shared):
+        super().__init__(own)
+        self._shared = shared
+
+    def _merged(self) -> dict:
+        merged = dict(self._shared)
+        # the raw dict view, not the overridden one: `keys()` goes back through here
+        merged.update(dict.items(self))
+        return merged
+
+    def __missing__(self, key):
+        return self._shared[key]
+
+    def __contains__(self, key) -> bool:
+        return dict.__contains__(self, key) or key in self._shared
+
+    def __iter__(self):
+        return iter(self._merged())
+
+    def __len__(self) -> int:
+        return len(self._merged())
+
+    def __eq__(self, other) -> bool:
+        return self._merged() == other
+
+    def __ne__(self, other) -> bool:
+        return not self.__eq__(other)
+
+    __hash__ = None
+
+    def get(self, key, default=None):
+        return self[key] if key in self else default
+
+    def keys(self):
+        return self._merged().keys()
+
+    def values(self):
+        return self._merged().values()
+
+    def items(self):
+        return self._merged().items()
+
+    def copy(self) -> dict:
+        return self._merged()
+
+    def __repr__(self) -> str:
+        return repr(self._merged())
+
+
 def _new_callback_handle(*_args, **_kwargs):
     """Side effect for mocked `run_*` registrations: return a fresh, unique handle."""
     return uuid.uuid4().hex
@@ -86,7 +145,10 @@ class HassMocks:
 
         def _hass_init_mock(self, _ad, name, *_args):
             hass_mocks._hass_instances.append(self)
-            if "app_name" in getattr(self, "args", {}):
+            # give this app its own args, so a later app's config cannot speak for it
+            shared_args = getattr(Hass, "args", {})
+            self.args = PerAppArgs(shared_args, shared_args)
+            if "app_name" in self.args:
                 hass_mocks.apps_mocks[self.args["app_name"]] = self
             else:
                 hass_mocks.apps_mocks[self.__module__] = self
