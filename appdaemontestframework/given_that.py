@@ -73,6 +73,9 @@ class GivenThatWrapper:
         # does not lose its structural metadata.
         self.area_entities = {}
         self.entity_meta = {}
+        # Device registry: an HA device id -> the entity ids that belong to it.
+        # Backs `device_id()` and `device_entities()`; an entity on no device has none.
+        self.device_entities = {}
 
         def get_app_mock(name):
             if name in self._hass_mocks.apps_mocks:
@@ -170,6 +173,13 @@ class GivenThatWrapper:
                 if args[0] in self.area_entities:
                     return args[0]
                 return self.entity_meta.get(args[0], {}).get("area")
+            if func == "device_entities":
+                return list(self.device_entities.get(args[0], [])) if args else []
+            if func == "device_id":
+                # The device an entity belongs to, None when it belongs to none - as HA does
+                if not args:
+                    return None
+                return next((device for device, entities in self.device_entities.items() if args[0] in entities), None)
             if func == "device_attr":
                 # Device registry attributes (`manufacturer`, `model`, ...). Served from
                 # the entity's own mocked attributes, falling back to the area registry.
@@ -250,6 +260,30 @@ class GivenThatWrapper:
                 }
 
         return IsWrapper()
+
+    def device(self, device_id):
+        """Register the entities that belong to a Home Assistant device.
+
+        Backs the `device_id()` and `device_entities()` template helpers (via the mocked
+        `render_template`). An entity never registered on a device has no device id, as in
+        Home Assistant for an entity that isn't tied to one.
+
+            given_that.device("87eac77bbc2c96a718cdf24bb0fb5b67").contains([
+                "fan.dyson_living_room",
+                "switch.dyson_living_room_night_mode",
+            ])
+        """
+        given_that_wrapper = self
+
+        class ContainsWrapper:
+            @staticmethod
+            def contains(entity_ids):
+                registered = given_that_wrapper.device_entities.setdefault(device_id, [])
+                for entity_id in entity_ids:
+                    if entity_id not in registered:
+                        registered.append(entity_id)
+
+        return ContainsWrapper()
 
     def area(self, area_name):
         """Register the entities that belong to a Home Assistant area.
