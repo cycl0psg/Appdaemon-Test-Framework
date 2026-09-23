@@ -78,7 +78,7 @@ class PerAppArgs(dict):
 
 
 def _new_callback_handle(*_args, **_kwargs):
-    """Side effect for mocked `run_*` registrations: return a fresh, unique handle."""
+    """Side effect for mocked `run_*` and `listen_*` registrations: return a fresh, unique handle."""
     return uuid.uuid4().hex
 
 
@@ -190,10 +190,13 @@ class HassMocks:
             MockHandler(Hass, "run_at_sunrise", side_effect=_new_callback_handle),
             MockHandler(Hass, "run_at_sunset", side_effect=_new_callback_handle),
             # Listener callback registrations functions
-            MockHandler(Hass, "listen_event"),
-            MockHandler(Hass, "cancel_listen_event"),
-            MockHandler(Hass, "listen_state"),
-            MockHandler(Hass, "cancel_listen_state"),
+            # A unique handle, not None: apps keep the handle to cancel the listener later,
+            # and a None handle looks like "never registered". Cancelling reports success,
+            # like AppDaemon does for a live handle.
+            MockHandler(Hass, "listen_event", side_effect=_new_callback_handle),
+            MockHandler(Hass, "cancel_listen_event", side_effect=lambda *_args, **_kwargs: True),
+            MockHandler(Hass, "listen_state", side_effect=_new_callback_handle),
+            MockHandler(Hass, "cancel_listen_state", side_effect=lambda *_args, **_kwargs: True),
             # State functions / attr
             MockHandler(Hass, "set_state"),
             MockHandler(Hass, "get_state"),
