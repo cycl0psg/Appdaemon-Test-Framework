@@ -3,6 +3,8 @@ from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime
 
+from appdaemon.models.config.app import AllAppConfig
+
 from appdaemontestframework.common import AppdaemonTestFrameworkError
 from appdaemontestframework.hass_mocks import HassMocks
 
@@ -30,30 +32,6 @@ class StateNotSetError(AppdaemonTestFrameworkError):
 
 class AttributeNotSetError(AppdaemonTestFrameworkError):
     pass
-
-
-class AttrDict(dict):
-    """A dict whose keys are also reachable as attributes.
-
-    AppDaemon >=4.5 exposes `self.app_config[app]` as a pydantic `AppConfig` model
-    (with `extra="allow"`), so app code legitimately probes it with
-    `hasattr(self.app_config[room], "motion_app")`. Plain dicts have no such
-    attributes, so mocking the config with them makes every `hasattr` check false.
-    """
-
-    def __getattr__(self, item):
-        try:
-            return self[item]
-        except KeyError as exc:
-            raise AttributeError(item) from exc
-
-    @classmethod
-    def convert(cls, value):
-        if isinstance(value, dict):
-            return cls({key: cls.convert(val) for key, val in value.items()})
-        if isinstance(value, list):
-            return [cls.convert(val) for val in value]
-        return value
 
 
 class GivenThatWrapper:
@@ -230,6 +208,9 @@ class GivenThatWrapper:
         self.mocked_passed_args.clear()
 
     def _init_mocked_app_config(self):
+        # TODO: the apps' configs are AppDaemon's own AppConfig (see app_config below), but what holds
+        # them is still a dict, where AppDaemon has an AllAppConfig: it answers [app] and `app in`, but
+        # has no .items(), .keys(), .values() or .get(), which this dict hides the same way
         self.mocked_app_config = self._hass_mocks.hass_functions["app_config"]
         self.mocked_app_config.clear()
 
@@ -351,9 +332,12 @@ class GivenThatWrapper:
         class IsWrapper:
             @staticmethod
             def is_set_to(argument_value):
-                # Stored as an AttrDict so `hasattr(app_config[app], "key")` behaves
-                # like it does against AppDaemon's pydantic AppConfig model.
-                given_that_wrapper.mocked_app_config[argument_key] = AttrDict.convert(argument_value)
+                # Built by AppDaemon itself, as it builds `self.app_config[app]`: a pydantic
+                # AppConfig named after the app, its nested values plain dicts. It answers
+                # `app_config[app]["key"]` and `hasattr(app_config[app], "key")`, but not
+                # `"key" in app_config[app]`, which is always False - a dict standing in for
+                # it would answer all three, and hide code that only works under test.
+                given_that_wrapper.mocked_app_config[argument_key] = AllAppConfig.model_validate({argument_key: argument_value}).root[argument_key]
 
         return IsWrapper()
 
