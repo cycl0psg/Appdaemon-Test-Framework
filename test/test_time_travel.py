@@ -40,6 +40,26 @@ def test_canceled_timer_does_not_run_callback(time_travel, automation):
     foo.assert_not_called()
 
 
+# `is`, not truthiness: an async timer_running handed apps a coroutine,
+# never awaited and always true
+def test_timer_running_while_the_timer_waits(time_travel, automation):  # pylint: disable=redefined-outer-name
+    handle = automation.run_in(mock.Mock(), 10)
+    time_travel.fast_forward(5).seconds()
+    assert automation.timer_running(handle) is True
+
+
+def test_timer_not_running_once_it_ran(time_travel, automation):  # pylint: disable=redefined-outer-name
+    handle = automation.run_in(mock.Mock(), 10)
+    time_travel.fast_forward(20).seconds()
+    assert automation.timer_running(handle) is False
+
+
+def test_timer_not_running_once_canceled(automation):  # pylint: disable=redefined-outer-name
+    handle = automation.run_in(mock.Mock(), 10)
+    automation.cancel_timer(handle)
+    assert automation.timer_running(handle) is False
+
+
 class Test_fast_forward:
     @staticmethod
     @pytest.fixture

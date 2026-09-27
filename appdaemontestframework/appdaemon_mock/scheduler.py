@@ -97,11 +97,10 @@ class MockScheduler:
         callback_kwargs["interval"] = interval
         return self._queue_calllback(callback, callback_kwargs, naive_dt)
 
-    async def timer_running(self, name, handle):
-        for callback in self._registered_callbacks:
-            if callback.handle == handle:
-                return True
-        return False
+    def timer_running(self, name, handle) -> bool:  # pylint: disable=unused-argument
+        # synchronous, as appdaemon's own: ADAPI.timer_running returns it without awaiting it,
+        # and a coroutine returned in its place was always true
+        return any(callback.handle == handle for callback in self._registered_callbacks)
 
     async def cancel_timer(self, name: str, handle, silent: bool = False) -> None:
         for callback in list(self._registered_callbacks):
