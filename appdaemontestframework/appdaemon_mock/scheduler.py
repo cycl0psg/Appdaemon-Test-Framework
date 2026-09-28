@@ -102,10 +102,13 @@ class MockScheduler:
         # and a coroutine returned in its place was always true
         return any(callback.handle == handle for callback in self._registered_callbacks)
 
-    async def cancel_timer(self, name: str, handle, silent: bool = False) -> None:
+    async def cancel_timer(self, name: str, handle, silent: bool = False) -> bool:  # pylint: disable=unused-argument
+        # whether a running timer was cancelled, as appdaemon's own: apps check it, and None read as a failure
         for callback in list(self._registered_callbacks):
             if callback.handle == handle:
                 self._registered_callbacks.remove(callback)
+                return True
+        return False
 
     def convert_naive(self, dt):
         # Is it naive?

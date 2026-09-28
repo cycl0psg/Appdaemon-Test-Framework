@@ -60,6 +60,18 @@ def test_timer_not_running_once_canceled(automation):  # pylint: disable=redefin
     assert automation.timer_running(handle) is False
 
 
+# `is`, not truthiness: None read as a failed cancel, where appdaemon answers True
+def test_cancelling_a_waiting_timer_says_it_did(automation):  # pylint: disable=redefined-outer-name
+    handle = automation.run_in(mock.Mock(), 10)
+    assert automation.cancel_timer(handle) is True
+
+
+def test_cancelling_a_timer_already_gone_says_it_did_not(automation):  # pylint: disable=redefined-outer-name
+    handle = automation.run_in(mock.Mock(), 10)
+    automation.cancel_timer(handle)
+    assert automation.cancel_timer(handle) is False
+
+
 class Test_fast_forward:
     @staticmethod
     @pytest.fixture
