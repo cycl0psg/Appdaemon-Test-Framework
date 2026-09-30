@@ -73,9 +73,13 @@ class GivenThatWrapper:
                     if entity_id is not None and entityid.split(".")[0] != entity_id:
                         continue
                     state = self.mocked_states[namespace][entityid]
+                    # AppDaemon hands out the full state here too, timestamps included
                     resdict[entityid] = {
                         "state": state['main'],
                         "attributes": state['attributes'],
+                        "last_updated": state['last_updated'].isoformat() if state['last_updated'] else None,
+                        "last_changed": state['last_changed'].isoformat() if state['last_changed'] else None,
+                        "entity_id": entityid,
                     }
                 return resdict
             else:

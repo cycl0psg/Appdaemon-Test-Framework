@@ -161,12 +161,15 @@ def test_get_complete_state_dictionary(given_that, automation: MockAutomation):
                                                            'color': 'blue'})
     given_that.state_of(COVER).is_set_to("closed", {'friendly_name': f"{COVER}",
                                                     'current_position': 0})
+    now = '2000-01-01T00:00:00+00:00'
     assert automation.get_complete_state_dictionary() == {
         COVER: {'attributes': {'current_position': 0,
                                'friendly_name': COVER},
-                'state': 'closed'},
+                'state': 'closed', 'entity_id': COVER,
+                'last_updated': now, 'last_changed': now},
         LIGHT: {'attributes': {'brightness': 11, 'color': 'blue'},
-                'state': 'on'}}
+                'state': 'on', 'entity_id': LIGHT,
+                'last_updated': now, 'last_changed': now}}
 
 
 @pytest.mark.only
